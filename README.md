@@ -16,8 +16,12 @@ Read-only by design: the plugin only runs `git log` / `git show` /
 <kbd>⌃</kbd><kbd>\`</kbd>). A row of cards appears; click `Commit review`.
 
 **B — the bottom panel already has a tab in it:** the cards are gone and only
-the tab strip is left. Click the **`+`** (`New tab`) at the left of the strip —
-`Commit review` is in that menu.
+the tab strip is left. Click the small **`+`** at the **far left of the bottom
+panel's own tab strip** — `Commit review` is in that menu.
+
+> There are **two identical `+` buttons** on screen. The one in the window's
+> top-right corner opens a new *session* tab; the one you want is **inside the
+> bottom panel**, flush against its left edge.
 
 **C — right sidebar:** click `Open right sidebar` (top-right,
 <kbd>⇧</kbd><kbd>⌘</kbd><kbd>B</kbd>) and click `Commit review` in the list.
