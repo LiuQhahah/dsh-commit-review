@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Commit review",
+    "description": "Commits produced in this workspace, grouped by repository, each expandable to its per-file diff."
+  }
+}
