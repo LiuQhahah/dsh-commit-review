@@ -1,57 +1,79 @@
-# Commit review — DSH 插件
+# Commit review — a DeepSeek Harness plugin
 
-把「这次会话里 AI agent 到底改了什么」按 **commit message** 组织成一个常驻侧栏页签。
+Turns "what did the agents actually change in this session?" into a permanent
+sidebar tab, organised by **commit message**.
 
-数据只读：插件只跑 `git log` / `git show` / `git rev-parse`，不 stage、不 commit、不写盘。
+Read-only by design: the plugin only runs `git log` / `git show` /
+`git rev-parse`. It never stages, commits, or writes anything.
 
-## 它长什么样
+> Chinese version: [README.zh-CN.md](README.zh-CN.md)
 
-右侧栏 → **「提交审查 / Commit review」** 页签：
+## What you get
 
-- 顶部时间范围：**今天 / 近 7 天 / 近 30 天**，或手动选 `since` / `until`；
-- 多仓工作区可以按 **仓库** 过滤（本工作区下 55 个 git 仓都会被扫到）；
-- 每个仓库一段，按时间倒序列出提交：短 hash、时间、commit message、`+N/−M`；
-- 点某个提交的 **展开 diff** → 行级红绿高亮的 unified diff（`AbortController` 取消、超大 diff 截断）；
-- 点「N 个文件」→ 该提交的文件清单与每个文件的增删行数。
+Right sidebar → the **"Commit review"** tab:
 
-## 安装
+- **Time range** presets at the top — **Today / Last 7 days / Last 30 days** — or
+  pick `since` / `until` by hand.
+- **Repository filter** for multi-repository workspaces (every git repository
+  under the workspace is discovered; 55 in the author's workspace).
+- One section per repository, commits newest first: short hash, timestamp,
+  commit message, and `+N/−M`.
+- **Show diff** on any commit → a unified diff with line-level red/green
+  highlighting (`AbortController` cancellation; oversized diffs are truncated).
+- Click **"N files"** → that commit's file list with per-file added/deleted
+  counts.
+
+## Install
 
 ```bash
-# 用本目录的绝对路径作为 target（示例假设你 clone 到了 ~/dsh-plugins/commit-review）
+# Use this directory's absolute path as the target
+# (the example assumes you cloned to ~/dsh-plugins/commit-review)
 dsh plugin --profile web add "$(pwd)"
 ```
 
-或者让 agent 调 `plugin_manager` 的 `install_bundle`（target 传本目录的绝对路径）。
+Or have the agent call `plugin_manager`'s `install_bundle` with this
+directory's absolute path as the target.
 
-安装后 **必须重启 `dsh web`** 才会加载 host 侧路由，然后浏览器 `Cmd+Shift+R` 硬刷新。
-`dsh plugin` 把包以 `link:` 形式装进 profile，改这里的源码后重启即生效，无需重新安装。
+**You must restart `dsh web`** after installing so the host routes load, then
+hard-refresh the browser (`Cmd+Shift+R`). `dsh plugin` installs the package into
+the profile as a `link:`, so editing the source here and restarting is enough —
+no reinstall needed.
 
-> 写 `~/.dsh` 需要较高权限；如果 `dsh plugin` 报权限错误，用 `danger-full-access` 重试。
+> Writing to `~/.dsh` needs elevated permission; if `dsh plugin` fails with a
+> permission error, retry with `danger-full-access`.
 
-## 结构
+## Layout
 
-| 文件 | 作用 |
+| File | Purpose |
 |---|---|
-| `index.js` | Host 半：注册 `GET /api/commit-review/{repos,summary,diff}` 三条只读路由 |
-| `client.js` | Client 半：向 `dsh-better-sidebar` 注册页签，渲染提交列表与 diff |
-| `cordis.patch.yml` | bundle 补丁，把本包作为插件插入宿主组合 |
-| `locale/{en,zh}.json` | 插件元数据（页签标题/描述） |
+| `index.js` | Host half: registers the three read-only `GET /api/commit-review/{repos,summary,diff}` routes |
+| `client.js` | Client half: registers the tab with `dsh-better-sidebar` and renders the commit list and diffs |
+| `cordis.patch.yml` | Bundle patch that inserts this package into the host composition |
+| `locale/{en,zh}.json` | Plugin metadata (tab title and description) |
 
-Host 与 Client 用同一份字面量前缀 `api/commit-review`（Client 用同源相对路径，无前导斜杠）。
+Host and Client share one literal prefix, `api/commit-review`. The Client uses a
+same-origin relative path with no leading slash.
 
-## 两个已经踩过的坑（改代码时别踩回去）
+## Two pitfalls already hit (don't reintroduce them)
 
-1. **`git log` 的记录分隔符必须放在 format 开头。**
-   `--numstat` 的文件行是追加在 format 输出**之后**的，`\u001e` 放末尾会把每个提交的文件行推到下一条记录，
-   结果是所有提交都显示 `files=0 +0/−0`。正确写法：`\x1e%H\x1f%aI\x1f%s\x1f%b`。
+1. **The `git log` record separator must OPEN the format, not close it.**
+   `--numstat` appends its file rows **after** the format output, so a trailing
+   `\u001e` pushes every commit's file rows into the next record — and every
+   commit ends up showing `files=0 +0/−0`. Correct form:
+   `\x1e%H\x1f%aI\x1f%s\x1f%b`.
 
-2. **读 `ctx.sessions` 必须用 inject 回调里的那个 context。**
-   cordis 的服务只能在声明它的 fiber 上读；在 `apply(ctx)` 的外层 ctx 上读会抛
-   `cannot get property "sessions" without inject`，表现为路由 400。所以三条 handler 都通过
-   `ctx.inject(['webServer','sessions'], (scoped) => …)` 拿 `scoped`，再把 `scoped` 传进 `sessionCwd()`。
+2. **Read `ctx.sessions` from the context inside the inject callback.**
+   A cordis service is only readable from the fiber that declared it; reading it
+   from the outer `apply(ctx)` context throws
+   `cannot get property "sessions" without inject`, which surfaces as an HTTP 400
+   on the routes. All three handlers therefore take `scoped` from
+   `ctx.inject(['webServer','sessions'], (scoped) => …)` and pass `scoped` into
+   `sessionCwd()`.
 
-## 一个设计上的取舍
+## One design trade-off
 
-`SessionStore.get(id)` 只返回**进程内存里的活跃会话**。服务重启后老会话不在内存里，
-这时如果只靠 `sessionId` 解析工作区就会失败。所以 Client 会把侧栏 scope 里的 `cwd` 一起传上来，
-Host 在「会话不在内存」时退回用它解析（`sessionCwd(scoped, sessionId, explicit)`）。
+`SessionStore.get(id)` only returns sessions **live in process memory**. After a
+server restart an older session is no longer in memory, so resolving the
+workspace from `sessionId` alone fails. The Client therefore also sends the
+sidebar scope's `cwd`, and the Host falls back to it when the session is not in
+memory (`sessionCwd(scoped, sessionId, explicit)`).
