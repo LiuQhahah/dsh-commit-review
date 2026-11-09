@@ -6,6 +6,15 @@
 
 数据只读：插件只跑 `git log` / `git show` / `git rev-parse`，不 stage、不 commit、不写盘。
 
+## 入口在哪（找不到页签时先看这张图）
+
+![两个入口的位置](docs/guide-entry-points.zh.png)
+
+1. 点右上角的 **① 底部面板** 按钮（`Expand bottom panel`）→ 面板里一排卡片，点 **③ `Commit review`**；
+2. 或者点右上角的 **② 右侧栏** 按钮（`Open right sidebar`，快捷键 <kbd>⇧⌘B</kbd>）→ 在右侧栏列表里点 **④ `Commit review`**。
+
+两个按钮都在窗口**右上角**、`Split` / `Fullscreen` 左边，图标都是「面板」形状，只差一个朝下、一个朝右。
+
 ## 它长什么样
 
 ![Commit review 页签](docs/screenshot-commit-review.png)

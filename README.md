@@ -8,6 +8,18 @@ Read-only by design: the plugin only runs `git log` / `git show` /
 
 > Chinese version: [README.zh-CN.md](README.zh-CN.md)
 
+## Where the two entry points are
+
+![Where the two entry points are](docs/guide-entry-points.en.png)
+
+1. Click **① Expand bottom panel** (top-right) → a row of cards appears → click
+   **③ `Commit review`**.
+2. Or click **② Open right sidebar** (top-right, <kbd>⇧⌘B</kbd>) → click
+   **④ `Commit review`** in the sidebar list.
+
+Both buttons sit in the **top-right corner**, just left of `Split` /
+`Fullscreen`. Same panel-shaped icon; one points down, one points right.
+
 ## What you get
 
 ![The Commit review tab](docs/screenshot-commit-review.png)
