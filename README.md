@@ -10,15 +10,22 @@ Read-only by design: the plugin only runs `git log` / `git show` /
 
 ## Where the two entry points are
 
-![Where the two entry points are](docs/guide-entry-points.en.png)
+![Three ways to open it](docs/guide-entry-points.en.png)
 
-1. Click **① Expand bottom panel** (top-right) → a row of cards appears → click
-   **③ `Commit review`**.
-2. Or click **② Open right sidebar** (top-right, <kbd>⇧⌘B</kbd>) → click
-   **④ `Commit review`** in the sidebar list.
+**A — the bottom panel is still empty:** click `Expand bottom panel` (top-right,
+<kbd>⌃</kbd><kbd>\`</kbd>). A row of cards appears; click `Commit review`.
 
-Both buttons sit in the **top-right corner**, just left of `Split` /
-`Fullscreen`. Same panel-shaped icon; one points down, one points right.
+**B — the bottom panel already has a tab in it:** the cards are gone and only
+the tab strip is left. Click the **`+`** (`New tab`) at the left of the strip —
+`Commit review` is in that menu.
+
+**C — right sidebar:** click `Open right sidebar` (top-right,
+<kbd>⇧</kbd><kbd>⌘</kbd><kbd>B</kbd>) and click `Commit review` in the list.
+
+> **The trap:** the cards from A only render while the panel has **no tabs at
+> all**. Open `Terminal` or `Git` in it once and they disappear permanently —
+> DSH persists the layout. That does not mean the plugin failed to load; use
+> the `+` menu from B.
 
 ## What you get
 

@@ -8,12 +8,15 @@
 
 ## 入口在哪（找不到页签时先看这张图）
 
-![两个入口的位置](docs/guide-entry-points.zh.png)
+![三种打开方式](docs/guide-entry-points.zh.png)
 
-1. 点右上角的 **① 底部面板** 按钮（`Expand bottom panel`）→ 面板里一排卡片，点 **③ `Commit review`**；
-2. 或者点右上角的 **② 右侧栏** 按钮（`Open right sidebar`，快捷键 <kbd>⇧⌘B</kbd>）→ 在右侧栏列表里点 **④ `Commit review`**。
+**方式 A —— 底部面板还空着时**：点右上角的 `Expand bottom panel`（<kbd>⌃</kbd><kbd>\`</kbd>），面板里会出现一排卡片，点 `Commit review`。
 
-两个按钮都在窗口**右上角**、`Split` / `Fullscreen` 左边，图标都是「面板」形状，只差一个朝下、一个朝右。
+**方式 B —— 底部面板里已经有页签时**：那排卡片会消失，只剩页签栏。点页签栏左边的 **`+`**（`New tab`），菜单里就有 `Commit review`。
+
+**方式 C —— 右侧栏**：点右上角的 `Open right sidebar`（<kbd>⇧</kbd><kbd>⌘</kbd><kbd>B</kbd>），在列表里点 `Commit review`。
+
+> **最容易踩的坑**：方式 A 的卡片只在面板**完全空着**时出现。只要你在这个面板里开过 `Terminal`、`Git` 之类任何一个页签，卡片就永久消失了（DSH 会记住布局）—— 这时候不是插件没装上，而是要用方式 B 的 `+`。
 
 ## 它长什么样
 
