@@ -8,6 +8,8 @@
 
 ## 它长什么样
 
+![Commit review 页签](docs/screenshot-commit-review.png)
+
 右侧栏 → **「提交审查 / Commit review」** 页签：
 
 - 顶部时间范围：**今天 / 近 7 天 / 近 30 天**，或手动选 `since` / `until`；

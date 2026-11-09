@@ -10,6 +10,8 @@ Read-only by design: the plugin only runs `git log` / `git show` /
 
 ## What you get
 
+![The Commit review tab](docs/screenshot-commit-review.png)
+
 Right sidebar → the **"Commit review"** tab:
 
 - **Time range** presets at the top — **Today / Last 7 days / Last 30 days** — or
