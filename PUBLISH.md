@@ -21,32 +21,53 @@
 
 `npm stage publish` 之所以能成功，是因为手册明确写了它**故意跳过 2FA**（把 2FA 推迟到 approve）；但 `npm stage approve` 和 `npm stage reject` 都需要 2FA，而账号没开 2FA → 两者都返回 404。
 
-## 你要做的（二选一）
+## 你的情况：2FA 已开，但用的是「安全密钥」不是「验证器 App」
 
-### 方案 A：开启 2FA（推荐，唯一长期正确解）
+`GET /-/npm/v1/user` 现在返回 `tfa: { mode: "auth-and-writes", pending: null }`，2FA 已生效。
+没有二维码那一步，是因为你注册的是 **security key**（WebAuthn：Touch ID / Face ID / YubiKey 这类），
+不是 TOTP 验证器 App。两者都算 2FA，只是验证方式不同——安全密钥走浏览器，不产生 6 位数字码。
 
-1. 打开 https://www.npmjs.com/settings/gabi-saul/profile → Two-Factor Authentication → Enable
-2. 用手机上的验证器 App 扫码，保存恢复码
-3. 然后二选一：
-   - 直接发布：`npm publish --otp=<6位码>`
-   - 或审批已暂存的：`npm stage approve 90a75e3e-e703-4c21-a2eb-74c091862a3f --otp=<6位码>`
+所以 `--otp=<6位码>` 这条路对你**不适用**（你没有 6 位码可输），要走浏览器认证流程。
 
-开启 2FA 后，之前那个 404 应该消失（手册：账号没开 2FA 时这些命令不可用）。
+## 你要做的：一条命令
 
-### 方案 B：创建 bypass-2FA 的 granular token（短期可用，2027 年 1 月后失效）
+在**你自己的终端**里跑（必须是交互式终端，npm 需要 TTY 才能弹浏览器）：
 
 ```bash
-npm token create --bypass-2fa --name dsh-publish \
-  --packages-and-scopes-permission read-write
+cd /Users/qiang_liu/Downloads/workspace/iam/dsh-plugins/commit-review
+npm stage approve 90a75e3e-e703-4c21-a2eb-74c091862a3f
 ```
 
-会要求输入 npm 密码。拿到 token 后写入 `~/.npmrc`：
+它会打印类似：
 
 ```
-//registry.npmjs.org/:_authToken=<新token>
+npm error code EOTP
+npm error This operation requires a one-time password.
+npm error Open this URL in your browser to authenticate:
+npm error   https://www.npmjs.com/auth/cli/<uuid>
 ```
 
-然后 `npm publish` 即可。npm 官方警告：**带 bypass 2FA 且有直接发布权限的 token 将在 2027 年 1 月停止工作**（https://gh.io/bypass-2fa-tokens-no-longer-publish），所以这只是权宜之计。
+**点开那个 URL**（或在提示时让它自动打开）→ 页面上点 **Use security key** → Touch ID / 插入 YubiKey →
+认证成功后 CLI 会自动完成 approve，1.0.0 就发布出去了。
+
+### 不要直接 `npm publish`
+
+`1.0.0` 已经被 staged 占了 semver 唯一索引，npm 手册原文：
+
+> Staged packages share the same semver version unique index as published packages —
+> you cannot publish a version that already exists as a staged version for that package.
+
+直接 `npm publish` 1.0.0 会报 `409 Cannot publish over previously staged version`。
+要么 approve 已暂存的那条（推荐），要么先 `npm stage reject <id>` 再重新 publish。
+
+### ⚠️ 别用恢复码（recovery code）认证
+
+npm 文档原文：
+
+> Using a recovery code to log in triggers a temporary **72-hour security hold** on your account.
+> During this time, you cannot publish packages, create access tokens, or modify account settings.
+
+请用安全密钥本身，不要用恢复码。
 
 ## ⚠️ 需要尽快收尾的原因
 
