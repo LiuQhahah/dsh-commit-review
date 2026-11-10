@@ -45,6 +45,40 @@ npm stage approve <stage-id>
 # 点开 → Use security key → Touch ID / YubiKey
 ```
 
+### 坑 3：在包自己的目录里 `npm install` 会写入自依赖
+
+`npm stage publish` 之后（那时 registry 上 `latest` 还是空壳 `0.0.0-stage`），在**包自己的目录**里跑了一次：
+
+```bash
+npm install dsh-commit-review
+```
+
+npm 就把一条「自己依赖自己」写进了 `package.json`：
+
+```json
+"dependencies": { "dsh-commit-review": "^0.0.0-stage" }
+```
+
+`^0.0.0-stage` 的区间是 `>=0.0.0-stage <0.0.1-0`，**只匹配那个空壳**，不匹配 1.0.0，
+所以 `node_modules/dsh-commit-review/` 里只有 `package.json` + `README.md`。
+
+修复（commit `e6e0ecb`）：
+
+- 从 `package.json` 删掉 `dependencies`
+- 删掉被一起提交的 `package-lock.json`，并加进 `.gitignore`
+- 删掉本地 `node_modules`
+
+**已发布的 1.0.0 本身是干净的**——staged tarball 是在被污染之前打的（14:10），
+approve 只是把那个已暂存的 tarball 发布出去，所以 registry 上 `1.0.0` 的
+`dependencies` 是 `null`。验证过：
+
+```bash
+npm install dsh-commit-review     # 干净目录里，10 个文件，stub 字段不存在
+```
+
+教训：**不要在包自己的源码目录里 `npm install` 自己的包名**。想验证发布结果，
+换个临时目录（`mkdir /tmp/t && cd /tmp/t && npm install dsh-commit-review`）。
+
 ## 注意事项
 
 - **不要用 recovery code 认证**：npm 文档写明用恢复码登录会触发 **72 小时 security hold**，
