@@ -1,52 +1,77 @@
-# dsh-commit-review npm 发布步骤（已准备好的部分 + 你要执行的 3 步）
+# dsh-commit-review 发布状态与后续步骤
 
-## 我已经做好的（commit 4d553a2 已 push）
+## 当前状态（2026-11-10）
 
-- 包名 `@local/dsh-commit-review` → `dsh-commit-review`（package.json / cordis.patch.yml / client.js 的 loader id / index.js 注释，共 5 处）
-- 删掉 `"private": true`
-- 补 `license: MIT`、`repository`、`homepage`、`bugs`、`keywords`（含 `dsh-plugin`）
-- README 的 5 张图改成 `raw.githubusercontent.com` 绝对地址（npm 页面不再裂图，包体积仍 16.8 kB）
-- 本地 profile 的安装从旧名迁到新名（`plugin_manager remove_bundle` + `install_bundle`），已确认 3080 路由正常
-- 用打包出来的 tarball 在隔离 profile 里完整验证过：`[commit-review] routes registered`、bundle 注入、右侧栏出现 `Commit review`
-- 仓库加了 `dsh-plugin` topic
-- `npm publish --dry-run` 通过：10 files / 16.8 kB
+| 项 | 状态 |
+| --- | --- |
+| 代码/打包 | ✅ 就绪，`npm pack` 10 文件 / 16.8 kB |
+| `npm publish` | ❌ E403：`Two-factor authentication or granular access token with bypass 2fa enabled is required to publish packages` |
+| `npm stage publish` | ✅ 成功，已暂存 `dsh-commit-review@1.0.0`，stage id `90a75e3e-e703-4c21-a2eb-74c091862a3f` |
+| `npm stage approve` | ❌ 404（因为账号没开 2FA） |
+| registry 现状 | ⚠️ 包名已可被公开安装，但解析到 `0.0.0-stage` 占位空壳 |
 
-## 你要执行的 3 步
+## 根因
 
-### 1. 登录 npm（当前 token 已失效）
+不是「token 过期」那么简单，是 npm 现在的发布策略：
+
+1. `npm publish` 要求**发布时必须提供 2FA 证明**（proof-of-presence）。
+2. 你的账号 `gabi-saul` 的 `tfa` 是 **false**（`GET /-/npm/v1/user` 实测），即根本没开 2FA。
+3. `~/.npmrc` 里那把 `npm_DL3sc…` 是 `npm login` 的**会话 token**，会话 token 没有 bypass-2FA 权限；账号里唯一一把带 `bypass_2fa=true` 的 granular token（`pi-web`）已在 2026-10-21 过期。
+4. 所以注册表只能拒绝：既没有 2FA 码，token 也不能免 2FA。
+
+`npm stage publish` 之所以能成功，是因为手册明确写了它**故意跳过 2FA**（把 2FA 推迟到 approve）；但 `npm stage approve` 和 `npm stage reject` 都需要 2FA，而账号没开 2FA → 两者都返回 404。
+
+## 你要做的（二选一）
+
+### 方案 A：开启 2FA（推荐，唯一长期正确解）
+
+1. 打开 https://www.npmjs.com/settings/gabi-saul/profile → Two-Factor Authentication → Enable
+2. 用手机上的验证器 App 扫码，保存恢复码
+3. 然后二选一：
+   - 直接发布：`npm publish --otp=<6位码>`
+   - 或审批已暂存的：`npm stage approve 90a75e3e-e703-4c21-a2eb-74c091862a3f --otp=<6位码>`
+
+开启 2FA 后，之前那个 404 应该消失（手册：账号没开 2FA 时这些命令不可用）。
+
+### 方案 B：创建 bypass-2FA 的 granular token（短期可用，2027 年 1 月后失效）
 
 ```bash
-npm login
+npm token create --bypass-2fa --name dsh-publish \
+  --packages-and-scopes-permission read-write
 ```
 
-`~/.npmrc` 里 registry.npmjs.org 那个 token 实测返回 401，必须重新登录。没有 npm 账号就先在 https://www.npmjs.com/signup 注册。
+会要求输入 npm 密码。拿到 token 后写入 `~/.npmrc`：
 
-### 2. 发布
-
-```bash
-cd /Users/qiang_liu/Downloads/workspace/iam/dsh-plugins/commit-review
-npm publish
+```
+//registry.npmjs.org/:_authToken=<新token>
 ```
 
-不用加 `--access public`（无 scope 的包默认 public）。
+然后 `npm publish` 即可。npm 官方警告：**带 bypass 2FA 且有直接发布权限的 token 将在 2027 年 1 月停止工作**（https://gh.io/bypass-2fa-tokens-no-longer-publish），所以这只是权宜之计。
 
-### 3. 验证
+## ⚠️ 需要尽快收尾的原因
 
-```bash
-npm view dsh-commit-review version
+`npm stage publish` 会在 registry 里创建一个公开可见的 **`0.0.0-stage` 占位版本**（`stub: true`），`dist-tags.latest` 指向它。实测：
+
+```
+$ npm install dsh-commit-review
+added 1 package
+$ ls node_modules/dsh-commit-review/
+package.json  README.md     ← 空壳，没有任何功能代码
 ```
 
-## 发布后（可选，但推荐）
+也就是说，现在任何人执行 `dsh plugin --profile web add dsh-commit-review` 都会装到一个空包。所以这件事要尽快用 approve（发布 1.0.0）或 reject（删掉暂存 + 占位）收尾，不要长期挂着。
 
-### A. 让别人能一键安装
+## 发布后的收尾
+
+### 让别人能一键安装
 
 ```bash
 dsh plugin --profile web add dsh-commit-review
 ```
 
-### B. 收录进插件市场（dshmarket 才能搜到）
+### 收录进插件市场（dshmarket 才能搜到）
 
-`dshmarket` 读的是 https://awesome-dsh-plugin.com/plugins.json ，收录方式是**给 `awesome-dsh-plugin/awesome-dsh-plugin` 提 PR**，加一个文件 `data/plugins/LiuQhahah__dsh-commit-review.yml`：
+`dshmarket` 读的是 https://awesome-dsh-plugin.com/plugins.json ，收录方式是给 `awesome-dsh-plugin/awesome-dsh-plugin` 提 PR，加一个文件 `data/plugins/LiuQhahah__dsh-commit-review.yml`：
 
 ```yaml
 url: https://github.com/LiuQhahah/dsh-commit-review
@@ -57,6 +82,6 @@ description:
   zh: '在侧栏按仓库分组查看本工作区产生的提交，每个提交可展开查看文件级 diff。'
 ```
 
-注意 `category` 从这些里选：`agi` `ui` `usage` `theme` `model` `identity` `session` `memory` `tools` `wsl` `browser` `vision` `voice` `docs` `skill` `workflow` `git` `notify` `dev` `security` `remote` `market` `fun`。选 `git` 最贴。
+`category` 合法值：`agi` `ui` `usage` `theme` `model` `identity` `session` `memory` `tools` `wsl` `browser` `vision` `voice` `docs` `skill` `workflow` `git` `notify` `dev` `security` `remote` `market` `fun`。选 `git` 最贴。
 
-收录要求（已满足的）：仓库 `package.json` 有 `dsh.bundle` 声明 ✓、真实代码 ✓、建仓满 1 天（2026-11-09 建，明天达标）、有 `dsh-plugin` topic ✓。
+收录硬要求（均已满足）：`package.json` 有 `dsh.bundle` ✓、真实代码 ✓、建仓满 1 天（2026-11-09 建）✓、有 `dsh-plugin` topic ✓、非纯聚合包 ✓。
