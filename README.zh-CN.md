@@ -8,7 +8,7 @@
 
 ## 入口在哪（找不到页签时先看这张图）
 
-![三种打开方式](docs/guide-entry-points.zh.png)
+![三种打开方式](https://raw.githubusercontent.com/LiuQhahah/dsh-commit-review/main/docs/guide-entry-points.zh.png)
 
 **方式 A —— 底部面板还空着时**：点右上角的 `Expand bottom panel`（<kbd>⌃</kbd><kbd>\`</kbd>），面板里会出现一排卡片，点 `Commit review`。
 
@@ -16,7 +16,7 @@
 
 > 注意窗口里有**两个长得一样的 `+`**：右上角那个是「新建会话页签」，点它只会开一个新会话、**不会弹出菜单**；要的是**底部面板内部**、紧贴面板左边缘的那个 `+`。
 >
-> ![底部面板的 +](docs/plus-button.zh.png)
+> ![底部面板的 +](https://raw.githubusercontent.com/LiuQhahah/dsh-commit-review/main/docs/plus-button.zh.png)
 
 **方式 C —— 右侧栏**：点右上角的 `Open right sidebar`（<kbd>⇧</kbd><kbd>⌘</kbd><kbd>B</kbd>），在列表里点 `Commit review`。
 
@@ -24,7 +24,7 @@
 
 ## 它长什么样
 
-![Commit review 页签](docs/screenshot-commit-review.png)
+![Commit review 页签](https://raw.githubusercontent.com/LiuQhahah/dsh-commit-review/main/docs/screenshot-commit-review.png)
 
 右侧栏 → **「提交审查 / Commit review」** 页签：
 

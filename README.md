@@ -10,7 +10,7 @@ Read-only by design: the plugin only runs `git log` / `git show` /
 
 ## Where the two entry points are
 
-![Three ways to open it](docs/guide-entry-points.en.png)
+![Three ways to open it](https://raw.githubusercontent.com/LiuQhahah/dsh-commit-review/main/docs/guide-entry-points.en.png)
 
 **A — the bottom panel is still empty:** click `Expand bottom panel` (top-right,
 <kbd>⌃</kbd><kbd>\`</kbd>). A row of cards appears; click `Commit review`.
@@ -33,7 +33,7 @@ panel's own tab strip** — `Commit review` is in that menu.
 
 ## What you get
 
-![The Commit review tab](docs/screenshot-commit-review.png)
+![The Commit review tab](https://raw.githubusercontent.com/LiuQhahah/dsh-commit-review/main/docs/screenshot-commit-review.png)
 
 Right sidebar → the **"Commit review"** tab:
 

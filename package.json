@@ -1,9 +1,27 @@
 {
-  "name": "@local/dsh-commit-review",
+  "name": "dsh-commit-review",
   "version": "1.0.0",
-  "private": true,
-  "type": "module",
   "description": "Review commits produced in the session workspace, grouped by repository, with per-file diffs.",
+  "license": "MIT",
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "git",
+    "commit",
+    "diff",
+    "code-review",
+    "better-sidebar"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LiuQhahah/dsh-commit-review.git"
+  },
+  "homepage": "https://github.com/LiuQhahah/dsh-commit-review#readme",
+  "bugs": {
+    "url": "https://github.com/LiuQhahah/dsh-commit-review/issues"
+  },
+  "type": "module",
   "exports": {
     ".": "./index.js",
     "./client": "./client.js",
@@ -18,7 +36,9 @@
     "icon.svg"
   ],
   "dsh": {
-    "bundle": { "patch": "./cordis.patch.yml" },
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
     "client": {
       "platform": "web",
       "immediately": true,

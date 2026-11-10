@@ -1,5 +1,5 @@
 /**
- * Client half of `@local/dsh-commit-review`.
+ * Client half of `dsh-commit-review`.
  *
  * Registers one dsh-better-sidebar tab that answers "what did this session's
  * agents commit, and what exactly changed?" — commits grouped by repository,
@@ -10,7 +10,7 @@
  * itself and stays read-only.
  */
 window.__ModuleLoader__.load({
-  id: '@local/dsh-commit-review',
+  id: 'dsh-commit-review',
   factory(require) {
     const React = require('react')
     const h = React.createElement

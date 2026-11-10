@@ -1,5 +1,5 @@
 /**
- * Host half of `@local/dsh-commit-review`.
+ * Host half of `dsh-commit-review`.
  *
  * It exposes three read-only JSON routes that the Client module renders as a
  * "Commit review" sidebar tab:
