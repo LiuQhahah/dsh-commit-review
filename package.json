@@ -47,8 +47,5 @@
         "dsh-better-sidebar"
       ]
     }
-  },
-  "dependencies": {
-    "dsh-commit-review": "^0.0.0-stage"
   }
 }
